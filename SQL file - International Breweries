@@ -1,0 +1,234 @@
+SELECT *
+FROM international_breweries;
+
+SELECT years
+FROM international_breweries
+GROUP BY years;
+
+SELECT countries
+FROM international_breweries;
+
+
+SELECT brands
+FROM International_breweries
+WHERE brands NOT LIKE '%malt'
+GROUP BY brands;
+
+
+--Section 1, Question 1
+--Within the space of the last three years, what was the profit worth of the breweries,
+--inclusive of the anglophone and the francophone territories?
+SELECT SUM(profit) AS "Total_profit"
+FROM international_breweries
+WHERE years IN (2017,2018,2019);
+
+
+--Section 1, Question 2
+--Compare the total profit between these two territories in order for the territory manager,
+--Mr. Stone made a strategic decision that will aid profit maximization in 2020.
+SELECT
+	CASE
+	WHEN countries IN ('Benin', 'Togo', 'Senegal') THEN 'Francophone'
+	WHEN countries IN ('Nigeria', 'Ghana') THEN 'Anglophone'
+	END Territories,
+	SUM(profit) AS Total_profit
+FROM international_breweries
+WHERE years IN (2017,2018,2019)
+GROUP BY Territories;
+
+
+--Section 1, Question 3
+--Country that generated the highest profit in 2019?
+SELECT countries, SUM(profit) AS Total_profit
+FROM international_breweries
+GROUP BY countries
+ORDER BY Total_profit DESC
+LIMIT 1;
+
+
+--Section 1, Question 4
+--Help him find the year with the highest profit.
+SELECT years, SUM(profit) AS Total_profit
+FROM International_breweries
+GROUP BY years
+ORDER BY Total_profit DESC
+LIMIT 1;
+
+
+--Section 1, Question 5
+--Which month in the three years was the least profit generated?
+SELECT months, SUM(profit) AS Total_profit
+FROM International_breweries
+--WHERE years IN (2017, 2018, 2019)
+GROUP BY months
+ORDER BY Total_profit
+LIMIT 1;
+
+
+--Section 1, Question 6
+--What was the minimum profit in the month of December 2018?
+SELECT months, years, profit AS min_profit
+FROM International_breweries
+WHERE months IN ('December') AND years IN (2018)
+ORDER BY profit
+LIMIT 1;
+
+
+--Section 1, Question 7
+--Compare the profit in percentage for each of the month in 2019
+SELECT months, SUM(profit) * 100/(SELECT SUM(profit) AS Total_profit FROM International_breweries WHERE years IN (2019)) AS Profit_percent
+FROM International_breweries
+WHERE years IN (2019)
+GROUP BY months
+ORDER BY Profit_percent
+
+--Section1, Question 8
+--Which particular brand generated the highest profit in Senegal?
+SELECT Brands, SUM(profit) AS Total_profit
+FROM International_breweries
+WHERE countries IN ('Senegal')
+GROUP BY Brands
+ORDER BY Total_profit DESC
+LIMIT 1;
+
+
+--Section 2, Question 1
+--Within the last two years, the brand manager wants to know the top three brands
+--consumed in the francophone countries
+SELECT countries, brands, SUM(quantity) Total_quantity,
+		CASE
+		WHEN countries IN ('Benin', 'Togo', 'Senegal') THEN 'Francophone'
+		WHEN countries IN ('Nigeria', 'Ghana') THEN 'Anglophone'
+		END Territories
+FROM International_breweries
+WHERE years IN (2018, 2019) AND countries IN ('Benin', 'Togo', 'Senegal')
+GROUP BY countries, brands
+ORDER BY Total_quantity Desc
+LIMIT 9;
+
+--OR
+SELECT brands, SUM(quantity) Total_quantity
+FROM International_breweries
+WHERE years IN (2018, 2019) AND countries IN ('Benin', 'Togo', 'Senegal')
+GROUP BY brands
+ORDER BY Total_quantity Desc
+LIMIT 3;
+
+
+--Section 2, Question 2
+--Find out the top two choice of consumer brands in Ghana
+SELECT countries, brands, SUM(quantity) Total_quantity
+FROM International_breweries
+WHERE countries IN ('Ghana')
+GROUP BY countries, brands
+ORDER BY Total_quantity DESC
+LIMIT 2;
+
+
+--Section 2, Question 3
+--Find out the details of beers consumed in the past three years in the most oil rIch
+--country in West Africa.
+SELECT countries, brands, SUM(quantity) Total_quantity, SUM(profit) Total_profit
+FROM International_breweries
+WHERE countries IN ('Nigeria') AND years IN (2017, 2018, 2019) AND brands NOT LIKE '%malt'
+GROUP BY countries, brands
+ORDER BY Total_profit DESC;
+
+
+--Section 2, Question 4
+--Favorite malt brand in Anglophone region between 2018 and 2019
+SELECT countries, brands, SUM(quantity) Total_quantity,
+		CASE
+		WHEN countries IN ('Benin', 'Togo', 'Senegal') THEN 'Francophone'
+		WHEN countries IN ('Nigeria', 'Ghana') THEN 'Anglophone'
+		END Territories
+FROM International_breweries
+WHERE brands LIKE '%malt' AND countries IN ('Nigeria', 'Ghana') AND years IN (2018, 2019)
+GROUP BY countries, brands
+ORDER BY Total_quantity DESC
+LIMIT 2;
+
+--OR
+SELECT brands, SUM(quantity) Total_quantity
+FROM International_breweries
+WHERE brands LIKE '%malt' AND countries IN ('Nigeria', 'Ghana') AND years IN (2018, 2019)
+GROUP BY brands
+ORDER BY Total_quantity DESC
+LIMIT 1;
+
+
+--Section 2, Question 5
+--Which brands sold the highest in 2019 in Nigeria?
+SELECT countries, brands, SUM(quantity) Total_quantity
+FROM International_breweries
+WHERE countries IN ('Nigeria') AND years IN (2019)
+GROUP BY countries, brands
+ORDER BY Total_quantity DESC
+LIMIT 1;
+
+
+--Section 2, Question 6
+--Favorites brand in South_South region in Nigeria
+SELECT countries, brands, SUM(quantity) Total_quantity
+FROM International_breweries
+WHERE countries IN ('Nigeria') AND region IN ('southsouth')
+GROUP BY countries, brands
+ORDER BY Total_quantity DESC
+LIMIT 1;
+
+
+--Section 2, Question 7
+--Bear consumption in Nigeria
+SELECT countries, brands, SUM(quantity) Total_quantity
+FROM International_breweries
+WHERE brands NOT LIKE '%malt' AND countries IN ('Nigeria')
+GROUP BY countries, brands
+ORDER BY Total_quantity DESC;
+
+
+--Section 2, Question 8
+--Level of consumption of Budweiser in the regions in Nigeria
+SELECT countries, region, brands, SUM(quantity) Total_quantity
+FROM International_breweries
+WHERE brands LIKE 'budweiser' AND countries IN ('Nigeria')
+GROUP BY countries, region, brands
+ORDER BY Total_quantity DESC;
+
+
+--Section 2, Question 8
+--Level of consumption of Budweiser in the regions in Nigeria in 2019 (Decision on Promo)
+SELECT countries, region, brands, SUM(quantity) Total_quantity
+FROM International_breweries
+WHERE brands LIKE 'budweiser' AND countries IN ('Nigeria') AND years IN (2019)
+GROUP BY countries, region, brands
+ORDER BY Total_quantity DESC;
+
+
+--Section 3, Question 1
+--Country with the highest consumption of beer
+SELECT countries, brands, SUM(quantity) Total_quantity
+FROM International_breweries
+WHERE brands NOT LIKE '%malt'
+GROUP BY countries, brands
+ORDER BY Total_quantity DESC
+LIMIT 1;
+
+
+--Section 3, Question 2
+--Highest sales personnel of Budweiser in Senegal
+SELECT Sales_rep, countries, brands, SUM(cost) Total_sales
+FROM International_breweries
+WHERE brands LIKE 'budweiser' AND countries IN ('Senegal')
+GROUP BY Sales_rep, countries, brands
+ORDER BY Total_sales DESC
+LIMIT 1;
+
+
+--Section 3, Question 3
+--Country with the highest profit of the fourth quarter in 2019
+SELECT countries, SUM(profit) Total_profit
+FROM International_breweries
+WHERE months IN ('October', 'November', 'December') AND years IN (2019)
+GROUP BY countries
+ORDER BY Total_profit DESC
+LIMIT 1;
